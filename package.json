@@ -1,0 +1,42 @@
+{
+  "name": "docker-helper",
+  "version": "1.0.0",
+  "description": "A web interface that simplifies the process of setting up and managing Docker containers running on a server.",
+  "main": "index.js",
+  "bin": "index.js",
+  "pkg": {
+    "scripts": [
+      "backend/**/*.js"
+    ],
+    "assets": "frontend/**/*",
+    "targets": [
+      "node18-linux-x64"
+    ],
+    "outputPath": "dist"
+  },
+  "scripts": {
+    "backend": "npm run dev -w backend",
+    "frontend": "npm run dev -w frontend",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EMachin3/Docker-helper.git"
+  },
+  "keywords": [
+    "docker"
+  ],
+  "author": "EMachin3",
+  "license": "ISC",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "bugs": {
+    "url": "https://github.com/EMachin3/Docker-helper/issues"
+  },
+  "homepage": "https://github.com/EMachin3/Docker-helper#readme",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
