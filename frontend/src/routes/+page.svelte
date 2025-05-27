@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import { BooksTitle } from '$lib/components';
 
   let books = [];
 
@@ -11,6 +12,7 @@
   onMount(getBooks);
 </script>
 
+<BooksTitle />
 <ul>
   {#each books as book (book.id)}
     <li>{book.title}</li>
