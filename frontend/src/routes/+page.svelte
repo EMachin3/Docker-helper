@@ -1,27 +1,18 @@
 <script>
 	import { onMount } from 'svelte';
-	//TODO: remove rectangle import. this is just for testing figuring out the
-	//ideal layout for stuff within the rectangle
-	import { BooksTitle, RectanglesContainer, Rectangle } from '$lib/components';
+	import { BooksTitle, RectanglesContainer } from '$lib/components';
 
 	let books = [];
+
+	let containers = null;
 
 	async function getBooks() {
 		const response = await fetch('http://localhost:4000/books');
 		books = await response.json();
 	}
-
-	// onMount(getBooks);
 </script>
 
-<!-- <BooksTitle />
-<ul>
-  {#each books as book (book.id)}
-    <li>{book.title}</li>
-  {/each}
-</ul> -->
-
-<!-- <div class="centered-wrapper">
+<div class="centered-wrapper">
 	<RectanglesContainer />
 </div>
 
@@ -35,6 +26,4 @@
 		justify-content: center;
 		width: 100%;
 	}
-</style> -->
-
-<Rectangle label='ffmpeg'/>
+</style>
