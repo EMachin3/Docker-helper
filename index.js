@@ -12,7 +12,7 @@ const path = require("path");
 //const __dirname = dirname(__filename);
 
 // Start Backend
-const backend = spawn("node", [path.join(__dirname, "backend", "server.js")], {
+const backend = spawn("npm", ["run", "dev", "--prefix", "backend"], {
   stdio: "inherit",
 });
 

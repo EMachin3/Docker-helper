@@ -3,3 +3,4 @@ frontend/node_modules/
 dist/
 my-app
 frontend/.svelte-kit/
+backend/public/

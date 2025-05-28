@@ -23,5 +23,6 @@ app.use(express.json())
 app.use(cors(corsOptions))
 app.use('/books', bookRouter)
 app.use('/alt', altRouter)
+app.use(express.static('public'))
 
 module.exports = app
