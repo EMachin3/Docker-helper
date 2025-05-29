@@ -4,3 +4,4 @@ dist/
 my-app
 frontend/.svelte-kit/
 backend/public/
+backend/user_config/

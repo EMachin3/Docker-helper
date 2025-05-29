@@ -3,6 +3,7 @@ const cors = require('cors');
 
 const bookRouter = require('./routes/book.route.js')
 const altRouter = require('./routes/alt.route.js')
+let userContainers = require('./user_config/user_containers.js')
 
 const api_url = "https://api.linuxserver.io/api/v1/images?include_config=true&include_deprecated=false";
 let linuxserver_containers = [];
@@ -49,6 +50,11 @@ app.use(express.static('public'))
 //checks if the setup process is done before returning the API result
 app.get('/api/linuxserver_data', checkReadiness, (req, res) => {
   res.json(linuxserver_containers);
+});
+
+//TODO: see if this and maybe previous can be refactored out to an API route
+app.get('/api/user_containers', (req, res) => {
+  res.json(userContainers);
 });
 
 module.exports = app

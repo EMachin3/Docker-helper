@@ -2,21 +2,36 @@
     import { onMount } from 'svelte';
     import Rectangle from './Rectangle.svelte';
 
-    let containers = null;
+    let userContainers = null;
+    let linuxServerContainers = null;
 
-    async function getLinuxserverContainers() {
-		const response = await fetch('http://localhost:4000/api/linuxserver_data');
-		containers = await response.json();
+    async function getUserContainers() {
+		const response = await fetch('http://localhost:4000/api/user_containers');
+		userContainers = await response.json();
 	}
 
-	onMount(getLinuxserverContainers);
+    async function getLinuxServerContainers() {
+		const response = await fetch('http://localhost:4000/api/linuxserver_data');
+		linuxServerContainers = await response.json();
+	}
+
+	// onMount(getLinuxServerContainers);
+    onMount(getUserContainers);
 </script>
 
+<h2>My containers:</h2>
 <div class="container">
-    {#each containers as container}
+    {#each userContainers as container, index}
         <Rectangle repo_name={container.name} image_url={container.project_logo} />
     {/each}
 </div>
+
+<!-- <h2>Linux server:</h2>
+<div class="container">
+    {#each linuxServerContainers as container, index}
+        <Rectangle repo_name={container.name} image_url={container.project_logo} />
+    {/each}
+</div> -->
 
 <style>
     .container {
