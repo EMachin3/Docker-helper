@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { BooksTitle, Containers } from '$lib/components';
+	import { BooksTitle, Containers, TestContainers } from '$lib/components';
 
 	let books = [];
 
@@ -12,4 +12,4 @@
 	}
 </script>
 
-<Containers />
+<TestContainers />
