@@ -99,16 +99,7 @@ app.post('/api/user_containers', (req, res) => {
   res.json({ result: 'success' })*/
 });
 
-//TODO: request body needs to contain the ID of the container to run or something.
-//right now I'm just dealing with the test container though
-//more "accurate" description: you can run an image on its own. that will create
-//a container on its own. however, a "stretch goal" (probably an MVP but something
-//that will be done later) is to be able to resume containers that were previously
-//stopped. after you start a container using docker run -d, the only thing
-//outputted to the terminal will be the container ID. you should store an array
-//of existing container ID's in the JSON for each image. that way, you can
-//resume a specific existing container using docker start (containerID) in
-//the backend.
+
 app.post('/api/run_container', (req, res) => {
   // let container_command = `docker run -d --name=${req.body.name} `;
   let run_arguments = ['run', '-d', `--name=${req.body.name}`];
@@ -143,7 +134,6 @@ app.post('/api/run_container', (req, res) => {
       return res.status(500).json({ result: 'error', message: stderr });
     }
 
-    //TODO: here we would write the container ID from stdout to the JSON file somehow.
     // userContainers.push(req.body);
     // FileSystem.writeFile('./user_config/user_containers.json', JSON.stringify(userContainers), (writeErr) => {
     //   if (writeErr) {
@@ -151,9 +141,40 @@ app.post('/api/run_container', (req, res) => {
     //   }
     //   res.json({ result: 'success' });
     // });
+    res.json({ result: 'success', container_id: stdout.split("\n")[0] });
+  });
+  // res.json({ result: 'success' });
+});
+
+app.post('/api/start_container', (req, res) => {
+  let run_arguments = ['start', req.body.id];
+  console.log('docker ' + run_arguments.join(' '));
+  execFile('docker', run_arguments, (error, stdout, stderr) => {
+    if (error) {
+      console.log(stderr);
+      return res.status(500).json({ result: 'error', message: stderr });
+    }
+
     res.json({ result: 'success' });
   });
   // res.json({ result: 'success' });
 });
+
+app.post('/api/stop_container', (req, res) => {
+  console.log('Stop request body: ' + req.body)
+  let run_arguments = ['stop', req.body.id];
+  console.log('docker ' + run_arguments.join(' '));
+  execFile('docker', run_arguments, (error, stdout, stderr) => {
+    if (error) {
+      console.log(stderr);
+      return res.status(500).json({ result: 'error', message: stderr });
+    }
+
+    res.json({ result: 'success' });
+  });
+  // res.json({ result: 'success' });
+});
+
+//TODO: add endpoint for rm
 
 module.exports = app
