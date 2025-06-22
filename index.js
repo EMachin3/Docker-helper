@@ -27,4 +27,3 @@ process.on("SIGINT", () => {
   frontend.kill();
   process.exit();
 });
-

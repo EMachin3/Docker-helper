@@ -1,9 +1,9 @@
-const express = require('express')
+const express = require("express");
 
-const alt = require('../controllers/alt.controller.js')
+const alt = require("../controllers/alt.controller.js");
 
-const router = express.Router()
+const router = express.Router();
 
-router.get('/', alt)
+router.get("/", alt);
 
-module.exports = router
+module.exports = router;

@@ -1,10 +1,12 @@
-const books = require('../booksData.js')
+const books = require("../booksData.js");
 
 const getAllBooks = async () => {
   // simulate a delay
-  const data = await new Promise(resolve => setTimeout(() => resolve(books), 500))
+  const data = await new Promise((resolve) =>
+    setTimeout(() => resolve(books), 500),
+  );
 
-  return data
-}
+  return data;
+};
 
-module.exports = getAllBooks
+module.exports = getAllBooks;

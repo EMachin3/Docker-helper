@@ -21,7 +21,8 @@
 	//TODO: also make sure container ID is getting written to disk
 	async function runContainer(container) {
 		//TODO: see if you actually need to await here or not
-		if (container.id) { //resume ("start") existing container
+		if (container.id) {
+			//resume ("start") existing container
 			const response = await fetch('http://localhost:4000/api/start_container', {
 				method: 'POST',
 				headers: {
@@ -31,7 +32,8 @@
 					id: container.id
 				})
 			});
-		} else { //run new container
+		} else {
+			//run new container
 			const response = await fetch('http://localhost:4000/api/run_container', {
 				method: 'POST',
 				headers: {
@@ -62,7 +64,7 @@
 			container.running = false; //TODO: only change status if no backend error
 			testContainers = [...testContainers]; //re-render the containers so that the icon will update.
 		} else {
-			throw new Error("container ID not set");
+			throw new Error('container ID not set');
 		}
 	}
 
