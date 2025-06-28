@@ -139,6 +139,82 @@ app.post("/api/user_containers", (req, res) => {
   res.json({ result: 'success' })*/
 });
 
+app.delete("/api/user_containers", (req, res) => {
+  //if there is an image for this container, remove it, because trying to remove
+  //the image without removing the container will cause errors.
+  if (req.body.id) {
+    execFile("docker", ["rm", `${req.body.id}`], (error, stdout, stderr) => {
+      console.log(stdout);
+      if (error) {
+        console.log(stderr);
+        return res.status(500).json({ result: "error", message: stderr });
+      }
+      //now, remove the image.
+      execFile(
+        "docker",
+        ["image", "remove", `lscr.io/linuxserver/${req.body.name}:latest`],
+        (error, stdout, stderr) => {
+          console.log(stdout);
+          if (error) {
+            console.log(stderr);
+            return res.status(500).json({ result: "error", message: stderr });
+          }
+
+          const container_index = userContainers.findIndex(
+            (container) => container.name === req.body.name,
+          );
+          //remove the container from the list and shift
+          userContainers.splice(container_index, 1);
+
+          writeUserContainers(userContainers, (err) => {
+            if (err) {
+              return res.status(500).json({
+                result: "error",
+                message: "Failed to update user containers",
+              });
+            }
+            res.json({ result: "success" });
+          });
+        },
+      );
+    });
+  } else {
+    //TODO: i feel like i shouldn't be repeating code here but i need to know
+    //that deleting the image comes after the container is removed so
+    //deleting the container can't go in an optional if branch right?
+    //i'm assuming execFile is nonblocking so the only way to ensure
+    //sequential execution of the remaining code is to nest it inside
+    //the callback.
+    execFile(
+      "docker",
+      ["image", "remove", `lscr.io/linuxserver/${req.body.name}:latest`],
+      (error, stdout, stderr) => {
+        console.log(stdout);
+        if (error) {
+          console.log(stderr);
+          return res.status(500).json({ result: "error", message: stderr });
+        }
+
+        const container_index = userContainers.findIndex(
+          (container) => container.name === req.body.name,
+        );
+        //remove the container from the list and shift
+        userContainers.splice(container_index, 1);
+
+        writeUserContainers(userContainers, (err) => {
+          if (err) {
+            return res.status(500).json({
+              result: "error",
+              message: "Failed to update user containers",
+            });
+          }
+          res.json({ result: "success" });
+        });
+      },
+    );
+  }
+});
+
 app.post("/api/run_container", (req, res) => {
   // let container_command = `docker run -d --name=${req.body.name} `;
   let run_arguments = ["run", "-d", `--name=${req.body.name}`];
@@ -196,7 +272,10 @@ app.post("/api/run_container", (req, res) => {
           message: "Failed to update user containers",
         });
       }
-      res.json({ result: "success" });
+      res.json({
+        result: "success",
+        container_id: userContainers[container_index].id,
+      });
     });
     // FileSystem.writeFile('./user_config/user_containers.json', JSON.stringify(userContainers), (writeErr) => {
     //   if (writeErr) {

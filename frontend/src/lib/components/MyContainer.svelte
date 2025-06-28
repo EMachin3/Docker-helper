@@ -1,5 +1,5 @@
 <script>
-	let { repo_name, image_url, icon_name, on_click } = $props();
+	let { repo_name, image_url, icon_name, on_click, remove_handler } = $props();
 </script>
 
 <div class="rectangle">
@@ -7,7 +7,7 @@
 	<p id="repo_name">{repo_name}</p>
 	<div class="container_options">
 		<button class="option_button" id="edit_button">Edit</button>
-		<button class="option_button" id="delete_button">Delete</button>
+		<button class="option_button" id="delete_button" onclick={remove_handler}>Delete</button>
 	</div>
 	<button id="interact_button" onclick={on_click}
 		><img

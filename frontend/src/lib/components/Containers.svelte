@@ -54,6 +54,17 @@
 		containerPulling = { ...containerPulling }; //refresh won't occur unless containerPulling is reassigned
 	}
 
+	async function removeUserContainer(container) {
+		await fetch('http://localhost:4000/api/user_containers', {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(container)
+		});
+		await getNewContainers(); //should i await or not here
+	}
+
 	//TODO: this one definitely needs error handling
 	//TODO: also make sure container ID is getting written to disk
 	async function runContainer(container) {
@@ -118,6 +129,7 @@
 				repo_name={container.name}
 				image_url={container.project_logo}
 				icon_name="stop-button"
+				remove_handler={() => removeUserContainer(container)}
 				on_click={() => stopContainer(container)}
 			/>
 		{:else}
@@ -125,6 +137,7 @@
 				repo_name={container.name}
 				image_url={container.project_logo}
 				icon_name="play-button"
+				remove_handler={() => removeUserContainer(container)}
 				on_click={() => runContainer(container)}
 			/>
 		{/if}
