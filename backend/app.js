@@ -112,12 +112,10 @@ app.post("/api/user_containers", (req, res) => {
       userContainers.push(req.body);
       writeUserContainers(userContainers, (err) => {
         if (err) {
-          return res
-            .status(500)
-            .json({
-              result: "error",
-              message: "Failed to update user containers",
-            });
+          return res.status(500).json({
+            result: "error",
+            message: "Failed to update user containers",
+          });
         }
         res.json({ result: "success" });
       });
@@ -193,12 +191,10 @@ app.post("/api/run_container", (req, res) => {
     // });
     writeUserContainers(userContainers, (err) => {
       if (err) {
-        return res
-          .status(500)
-          .json({
-            result: "error",
-            message: "Failed to update user containers",
-          });
+        return res.status(500).json({
+          result: "error",
+          message: "Failed to update user containers",
+        });
       }
       res.json({ result: "success" });
     });

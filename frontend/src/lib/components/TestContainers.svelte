@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { BooksTitle, Rectangle } from '$lib/components';
+	import { BooksTitle, NewContainer } from '$lib/components';
 
 	let testContainers = [];
 
@@ -77,14 +77,14 @@
 <div class="container">
 	{#each testContainers as container, index}
 		{#if container.running}
-			<Rectangle
+			<NewContainer
 				repo_name={container.name}
 				image_url="images/testimage.jpg"
 				icon_name="stop-button"
 				on_click={() => stopContainer(container)}
 			/>
 		{:else}
-			<Rectangle
+			<NewContainer
 				repo_name={container.name}
 				image_url="images/testimage.jpg"
 				icon_name="play-button"

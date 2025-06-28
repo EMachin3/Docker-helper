@@ -27,6 +27,10 @@
 		align-items: center;
 		box-sizing: border-box;
 	}
+	p {
+		overflow-x: hidden;
+		text-overflow: ellipsis;
+	}
 	#interact_button {
 		visibility: hidden;
 	}

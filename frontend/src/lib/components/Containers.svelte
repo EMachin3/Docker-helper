@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
-	import Rectangle from './Rectangle.svelte';
+	import MyContainer from './MyContainer.svelte';
+	import NewContainer from './NewContainer.svelte';
 
 	let userContainers = [];
 	let linuxServerContainers = [];
@@ -113,14 +114,14 @@
 <div class="container">
 	{#each userContainers as container, index}
 		{#if container.running}
-			<Rectangle
+			<MyContainer
 				repo_name={container.name}
 				image_url={container.project_logo}
 				icon_name="stop-button"
 				on_click={() => stopContainer(container)}
 			/>
 		{:else}
-			<Rectangle
+			<MyContainer
 				repo_name={container.name}
 				image_url={container.project_logo}
 				icon_name="play-button"
@@ -135,10 +136,16 @@
 	{#each newContainers as container, index}
 		<!-- not sure if onclick being null would cause issues or not -->
 		{#if containerPulling[container.name]}
-			<Rectangle repo_name={container.name} icon_name="loading-icon" on_click={() => {}} />
-		{:else}
-			<Rectangle
+			<NewContainer
 				repo_name={container.name}
+				image_url={container.project_logo}
+				icon_name="loading-icon"
+				on_click={() => {}}
+			/>
+		{:else}
+			<NewContainer
+				repo_name={container.name}
+				image_url={container.project_logo}
 				icon_name="add-button"
 				on_click={() => addUserContainer(container)}
 			/>
