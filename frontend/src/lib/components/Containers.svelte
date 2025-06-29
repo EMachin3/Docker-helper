@@ -11,6 +11,9 @@
 		(x) => !userContainers.some((e) => e.name === x.name)
 	);
 
+	let edit_mode = false;
+	let container_editing = null;
+
 	async function getUserContainers() {
 		const response = await fetch('http://localhost:4000/api/user_containers');
 		userContainers = await response.json();
@@ -52,6 +55,16 @@
 		await getNewContainers(); //should i await or not here
 		delete containerPulling[container.name];
 		containerPulling = { ...containerPulling }; //refresh won't occur unless containerPulling is reassigned
+	}
+
+	/**
+	 * this function just enables edit mode and sets the container info, maybe rename?
+	 */
+	async function editUserContainer(container) {
+		//make a deep copy whose values can be bound to without
+		//affecting the original container
+		container_editing = JSON.parse(JSON.stringify(container));
+		edit_mode = true;
 	}
 
 	async function removeUserContainer(container) {
@@ -121,6 +134,57 @@
 	onMount(getNewContainers);
 </script>
 
+<!-- TODO: figure out a user-friendly approach for how to let people not specify optional
+environment variables -->
+<!-- also add descriptions and buttons to add env var/volume/port and custom settings as well -->
+<!-- TODO: need to handle the fact that you can't edit the config for an existing container (or maybe you can?) -->
+{#if edit_mode}
+	<form on:submit|preventDefault={() => alert('form submitted')}>
+		<h1>{`Edit container configuration for ${container_editing.name}`}</h1>
+		<h2>Environment variables:</h2>
+		{#each container_editing.config.env_vars as env_var, index}
+			<div class="label-wrap">
+				<label for={`env_var-${env_var.name}-value`}>{`${env_var.name}:`}</label>
+				<!-- <p>{env_var.name}</p> -->
+				<input
+					name={`env_var-${env_var.name}-value`}
+					type="text"
+					required={!env_var.optional}
+					bind:value={container_editing.config.env_vars[index].value}
+				/>
+				<!-- <p>{env_var.value}</p> -->
+			</div>
+		{/each}
+		<h2>Volumes: (Format: Container Path: Host Path)</h2>
+		{#each container_editing.config.volumes as volume, index}
+			<div class="label-wrap">
+				<label for={`volume-${volume.path}-hostpath`}>{`${volume.path}:`}</label>
+				<input
+					name={`volume-${volume.path}-hostpath`}
+					type="text"
+					required={!volume.optional}
+					bind:value={container_editing.config.volumes[index].host_path}
+				/>
+			</div>
+		{/each}
+		<h2>Ports (Format: Internal (Container) Port: External (Host) Port)</h2>
+		{#each container_editing.config.ports as port, index}
+			<div class="label-wrap">
+				<label for={`port-${port.external}-externalport`}>{`${port.internal}:`}</label>
+				<input
+					name={`port-${port.external}-externalport`}
+					type="text"
+					required={!port.optional}
+					bind:value={container_editing.config.ports[index].external}
+				/>
+			</div>
+			<!-- <p>{port.external}</p> -->
+			<!-- <p>{port.internal}</p> -->
+		{/each}
+		<button type="submit">Save Config</button>
+	</form>
+{/if}
+
 <h2>My containers:</h2>
 <div class="container">
 	{#each userContainers as container, index}
@@ -129,16 +193,20 @@
 				repo_name={container.name}
 				image_url={container.project_logo}
 				icon_name="stop-button"
+				edit_handler={() => {}}
 				remove_handler={() => removeUserContainer(container)}
-				on_click={() => stopContainer(container)}
+				interact_click={() => stopContainer(container)}
+				disable_edit={true}
 			/>
 		{:else}
 			<MyContainer
 				repo_name={container.name}
 				image_url={container.project_logo}
 				icon_name="play-button"
+				edit_handler={() => editUserContainer(container)}
 				remove_handler={() => removeUserContainer(container)}
-				on_click={() => runContainer(container)}
+				interact_click={() => runContainer(container)}
+				disable_edit={false}
 			/>
 		{/if}
 	{/each}
@@ -153,14 +221,14 @@
 				repo_name={container.name}
 				image_url={container.project_logo}
 				icon_name="loading-icon"
-				on_click={() => {}}
+				interact_click={() => {}}
 			/>
 		{:else}
 			<NewContainer
 				repo_name={container.name}
 				image_url={container.project_logo}
 				icon_name="add-button"
-				on_click={() => addUserContainer(container)}
+				interact_click={() => addUserContainer(container)}
 			/>
 		{/if}
 	{/each}
@@ -175,5 +243,9 @@
 		padding: 1rem;
 		max-width: fit-content;
 		margin: 0 auto;
+	}
+	.label-wrap {
+		display: flex;
+		margin-bottom: 10px;
 	}
 </style>
