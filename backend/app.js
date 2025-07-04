@@ -19,7 +19,7 @@ let linuxserver_containers = [];
 
 let isReady = false;
 
-//writingToFile is a global lock used to ensure that only one API call can access
+//userContainersLock is a global lock used to ensure that only one API call can access
 //the user_containers file at any given time. this ensures that multiple containers
 //can be pulled at once in a thread-safe manner.
 let userContainersLock = false;
@@ -139,8 +139,54 @@ app.post("/api/user_containers", (req, res) => {
   res.json({ result: 'success' })*/
 });
 
+app.put("/api/user_containers", (req, res) => {
+  //if there is a container for this image, remove it, because you can't change
+  //the config for a container as far as i know
+  if (req.body.id) {
+    execFile("docker", ["rm", `${req.body.id}`], (error, stdout, stderr) => {
+      console.log(stdout);
+      if (error) {
+        console.log(stderr);
+        return res.status(500).json({ result: "error", message: stderr });
+      }
+      const container_index = userContainers.findIndex(
+        (container) => container.name === req.body.name,
+      );
+      userContainers[container_index] = req.body;
+      delete userContainers[container_index].id;
+      // console.log(userContainers[container_index]);
+
+      writeUserContainers(userContainers, (err) => {
+        if (err) {
+          return res.status(500).json({
+            result: "error",
+            message: "Failed to update user containers",
+          });
+        }
+        res.json({ result: "success" });
+      });
+    });
+  } else {
+    //TODO: i feel like i shouldn't be repeating code here
+    const container_index = userContainers.findIndex(
+      (container) => container.name === req.body.name,
+    );
+    userContainers[container_index] = req.body; //make sure there's no extra fields or whatever
+
+    writeUserContainers(userContainers, (err) => {
+      if (err) {
+        return res.status(500).json({
+          result: "error",
+          message: "Failed to update user containers",
+        });
+      }
+      res.json({ result: "success" });
+    });
+  }
+});
+
 app.delete("/api/user_containers", (req, res) => {
-  //if there is an image for this container, remove it, because trying to remove
+  //if there is a container for this image, remove it, because trying to remove
   //the image without removing the container will cause errors.
   if (req.body.id) {
     execFile("docker", ["rm", `${req.body.id}`], (error, stdout, stderr) => {

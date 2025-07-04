@@ -52,7 +52,7 @@
 			},
 			body: JSON.stringify(container)
 		});
-		await getNewContainers(); //should i await or not here
+		await getUserContainers(); //should i await or not here
 		delete containerPulling[container.name];
 		containerPulling = { ...containerPulling }; //refresh won't occur unless containerPulling is reassigned
 	}
@@ -67,6 +67,11 @@
 		edit_mode = true;
 	}
 
+	async function closeEditMode() {
+		edit_mode = false;
+		container_editing = null;
+	}
+
 	async function removeUserContainer(container) {
 		await fetch('http://localhost:4000/api/user_containers', {
 			method: 'DELETE',
@@ -75,7 +80,7 @@
 			},
 			body: JSON.stringify(container)
 		});
-		await getNewContainers(); //should i await or not here
+		await getUserContainers(); //should i await or not here
 	}
 
 	//TODO: this one definitely needs error handling
@@ -131,6 +136,18 @@
 		}
 	}
 
+	async function updateContainer(container) {
+		await fetch('http://localhost:4000/api/user_containers', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(container)
+		});
+		await getUserContainers(); //should i await or not here
+		closeEditMode();
+	}
+
 	onMount(getNewContainers);
 </script>
 
@@ -139,7 +156,7 @@ environment variables -->
 <!-- also add descriptions and buttons to add env var/volume/port and custom settings as well -->
 <!-- TODO: need to handle the fact that you can't edit the config for an existing container (or maybe you can?) -->
 {#if edit_mode}
-	<form on:submit|preventDefault={() => alert('form submitted')}>
+	<form on:submit|preventDefault={() => updateContainer(container_editing)}>
 		<h1>{`Edit container configuration for ${container_editing.name}`}</h1>
 		<h2>Environment variables:</h2>
 		{#each container_editing.config.env_vars as env_var, index}
@@ -181,6 +198,7 @@ environment variables -->
 			<!-- <p>{port.external}</p> -->
 			<!-- <p>{port.internal}</p> -->
 		{/each}
+		<button on:click={() => closeEditMode()}>Close without Saving</button>
 		<button type="submit">Save Config</button>
 	</form>
 {/if}
