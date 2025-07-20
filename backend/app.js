@@ -88,6 +88,20 @@ app.get("/api/user_containers", (req, res) => {
   res.json(userContainers);
 });
 
+app.get("/api/user_containers/running", (req, res) => {
+  execFile("docker", ["ps", "--no-trunc"], (err, stdout, stderr) => {
+    let out_lines = stdout.split("\n");
+    out_lines.splice(0, 1);
+    out_lines.splice(-1, 1);
+    const curr_running = out_lines.map((line) => line.split("   ")[0]);
+    res.json(
+      userContainers.filter((container) =>
+        curr_running.some((cur) => cur === container.id),
+      ),
+    );
+  });
+});
+
 //TODO: remove this endpoint at some point
 app.get("/api/test_containers", (req, res) => {
   res.json(testContainers);
@@ -261,6 +275,28 @@ app.delete("/api/user_containers", (req, res) => {
   }
 });
 
+//TODO: instead of using this probably just use the put endpoint.
+//this doesn't work anyways because it doesn't delete the container
+//if there is an existing container
+app.delete("/api/user_containers/:name/env_var/:env_name", (req, res) => {
+  const container_index = userContainers.findIndex(
+    (container) => container.name === req.params.name,
+  );
+  const env_index = userContainers[container_index].config.env_vars.findIndex(
+    (env_var) => env_var.name === req.params.env_name,
+  );
+  userContainers[container_index].config.env_vars.splice(env_index, 1);
+  writeUserContainers(userContainers, (err) => {
+    if (err) {
+      return res.status(500).json({
+        result: "error",
+        message: "Failed to update user containers",
+      });
+    }
+    res.json({ result: "success", container: userContainers[container_index] });
+  });
+});
+
 app.post("/api/run_container", (req, res) => {
   // let container_command = `docker run -d --name=${req.body.name} `;
   let run_arguments = ["run", "-d", `--name=${req.body.name}`];
@@ -361,7 +397,5 @@ app.post("/api/stop_container", (req, res) => {
   });
   // res.json({ result: 'success' });
 });
-
-//TODO: add endpoint for rm
 
 module.exports = app;

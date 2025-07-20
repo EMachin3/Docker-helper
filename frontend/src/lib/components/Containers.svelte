@@ -15,14 +15,14 @@
 	let container_editing = null;
 
 	async function getUserContainers() {
-		const response = await fetch('http://localhost:4000/api/user_containers');
-		userContainers = await response.json();
+		let response = await fetch('http://localhost:4000/api/user_containers');
+		const newUserContainers = await response.json();
+		response = await fetch('http://localhost:4000/api/user_containers/running');
+		const runningContainers = await response.json();
+
 		//add a running flag to each user container.
-		//TODO: determine if it's necessary to check if each container is running or not.
-		//it should be safe to assume that no containers are running when the program starts
-		//but I'm not sure
-		userContainers = userContainers.map((container) => {
-			container.running = false;
+		userContainers = newUserContainers.map((container) => {
+			container.running = runningContainers.some((running) => running.id === container.id);
 			return container;
 		});
 	}
@@ -148,13 +148,33 @@
 		closeEditMode();
 	}
 
+	//maybe just change the container in the frontend and then use the existing updateContainer function/endpoint?
+	async function deleteEnvVar(container, env_var) {
+		const res = await fetch(
+			`http://localhost:4000/api/user_containers/${container.name}/env_var/${env_var.name}`,
+			{
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(container)
+			}
+		);
+		//still need to getUserContainers so that userContainers is updated, but since we don't
+		//have the index of container_editing we also have to update the frontend form values using
+		//the updated container JSON returned from the backend.
+		//could also make a separate variable to track the index of container_editing but that honestly
+		//could be even more fragile than this approach.
+		const data = await res.json();
+		container_editing = data.container;
+		await getUserContainers(); //should i await or not here
+	}
+
 	onMount(getNewContainers);
 </script>
 
-<!-- TODO: figure out a user-friendly approach for how to let people not specify optional
-environment variables -->
-<!-- also add descriptions and buttons to add env var/volume/port and custom settings as well -->
-<!-- TODO: need to handle the fact that you can't edit the config for an existing container (or maybe you can?) -->
+<!-- TODO: let users specify custom env vars, volumes, and ports -->
+<!-- also add descriptions and buttons to add env var/volume/port -->
 {#if edit_mode}
 	<form on:submit|preventDefault={() => updateContainer(container_editing)}>
 		<h1>{`Edit container configuration for ${container_editing.name}`}</h1>
@@ -169,6 +189,13 @@ environment variables -->
 					required={!env_var.optional}
 					bind:value={container_editing.config.env_vars[index].value}
 				/>
+				{#if env_var.optional}
+					<button on:click|preventDefault={() => deleteEnvVar(container_editing, env_var)}
+						>Delete</button
+					>
+				{:else}
+					<button on:click|preventDefault={() => {}} disabled>Delete</button>
+				{/if}
 				<!-- <p>{env_var.value}</p> -->
 			</div>
 		{/each}
@@ -182,6 +209,13 @@ environment variables -->
 					required={!volume.optional}
 					bind:value={container_editing.config.volumes[index].host_path}
 				/>
+				{#if volume.optional}
+					<button on:click|preventDefault={() => alert('Delete volume ' + JSON.stringify(volume))}
+						>Delete</button
+					>
+				{:else}
+					<button on:click|preventDefault={() => {}} disabled>Delete</button>
+				{/if}
 			</div>
 		{/each}
 		<h2>Ports (Format: Internal (Container) Port: External (Host) Port)</h2>
@@ -194,6 +228,13 @@ environment variables -->
 					required={!port.optional}
 					bind:value={container_editing.config.ports[index].external}
 				/>
+				{#if port.optional}
+					<button on:click|preventDefault={() => alert('Delete port ' + JSON.stringify(port))}
+						>Delete</button
+					>
+				{:else}
+					<button on:click|preventDefault={() => {}} disabled>Delete</button>
+				{/if}
 			</div>
 			<!-- <p>{port.external}</p> -->
 			<!-- <p>{port.internal}</p> -->
