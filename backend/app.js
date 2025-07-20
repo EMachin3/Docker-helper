@@ -278,6 +278,7 @@ app.delete("/api/user_containers", (req, res) => {
 //TODO: instead of using this probably just use the put endpoint.
 //this doesn't work anyways because it doesn't delete the container
 //if there is an existing container
+//TODO: delete this
 app.delete("/api/user_containers/:name/env_var/:env_name", (req, res) => {
   const container_index = userContainers.findIndex(
     (container) => container.name === req.params.name,
