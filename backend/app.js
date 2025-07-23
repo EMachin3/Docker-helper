@@ -9,9 +9,6 @@ const altRouter = require("./routes/alt.route.js");
 let userContainers = JSON.parse(
   FileSystem.readFileSync("./user_config/user_containers.json"),
 );
-let testContainers = JSON.parse(
-  FileSystem.readFileSync("./user_config/test_containers.json"),
-);
 
 const api_url =
   "https://api.linuxserver.io/api/v1/images?include_config=true&include_deprecated=false";
@@ -100,11 +97,6 @@ app.get("/api/user_containers/running", (req, res) => {
       ),
     );
   });
-});
-
-//TODO: remove this endpoint at some point
-app.get("/api/test_containers", (req, res) => {
-  res.json(testContainers);
 });
 
 app.post("/api/user_containers", (req, res) => {
